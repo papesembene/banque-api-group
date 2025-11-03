@@ -35,7 +35,8 @@ RUN mkdir -p storage/framework/{cache,data,sessions,testing,views} \
     && chown -R laravel:laravel /var/www/html \
     && chmod -R 775 storage bootstrap/cache
 
-# Générer clés Laravel + Passport
+# Copier .env et générer clés Laravel + Passport
+COPY .env.example .env
 RUN php artisan key:generate \
     && php artisan passport:keys --force
 
