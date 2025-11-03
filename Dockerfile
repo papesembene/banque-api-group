@@ -18,7 +18,7 @@ RUN composer require "zircote/swagger-php:^4.0" --no-scripts --no-interaction --
 FROM php:8.3-fpm-alpine
 
 # Installer extensions
-RUN apk add --no-cache postgresql-dev bash \
+RUN apk add --no-cache postgresql-dev postgresql-client bash \
     && docker-php-ext-install pdo pdo_pgsql
 
 # Ajouter utilisateur non-root

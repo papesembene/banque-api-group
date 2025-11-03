@@ -6,9 +6,9 @@
 # Clé app
 grep -q APP_KEY .env || php artisan key:generate
 
-# DB ready
-until pg_isready -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USERNAME"; do
-  echo "Waiting DB..." && sleep 1
+echo "Waiting for database..."
+while ! pg_isready -h $DB_HOST -p $DB_PORT -U $DB_USERNAME; do
+  sleep 1
 done
 
 # Migrations et clés Passport
