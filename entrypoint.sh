@@ -1,19 +1,24 @@
 #!/bin/sh
+set -e
 
-# .env
-[ ! -f .env ] && cp .env.example .env
-
-# Clé app
-grep -q APP_KEY .env || php artisan key:generate
-
-echo "Waiting for database..."
-while ! pg_isready -h $DB_HOST -p $DB_PORT -U $DB_USERNAME; do
+echo "⏳ Attente de la base de données..."
+while ! pg_isready -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USERNAME" >/dev/null 2>&1; do
   sleep 1
 done
+echo "✅ Base de données prête !"
 
-# Migrations et clés Passport
+# Générer clé d’application si absente
+if [ -z "$(grep 'APP_KEY=' .env | cut -d '=' -f2)" ]; then
+  echo "⚙️ Génération de la clé d’application..."
+  php artisan key:generate --force
+fi
+
+# Lancer les migrations et Passport
+echo "⚙️ Exécution des migrations..."
 php artisan migrate --force
-[ ! -f storage/oauth-private.key ] && php artisan passport:keys --force
 
-# Lancer app
+echo "⚙️ Vérification des clés Passport..."
+php artisan passport:keys --force
+
+echo "🚀 Application Laravel en cours de démarrage..."
 exec "$@"
