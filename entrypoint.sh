@@ -1,14 +1,19 @@
 #!/bin/sh
 
-# Attendre que la base de données soit prête
-echo "Waiting for database to be ready..."
-while ! pg_isready -h $DB_HOST -p $DB_PORT -U $DB_USERNAME; do
-  echo "Database is unavailable - sleeping"
-  sleep 1
+# .env
+[ ! -f .env ] && cp .env.example .env
+
+# Clé app
+grep -q APP_KEY .env || php artisan key:generate
+
+# DB ready
+until pg_isready -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USERNAME"; do
+  echo "Waiting DB..." && sleep 1
 done
 
-echo "Database is up - executing migrations"
+# Migrations et clés Passport
 php artisan migrate --force
+[ ! -f storage/oauth-private.key ] && php artisan passport:keys --force
 
-echo "Starting Laravel application..."
+# Lancer app
 exec "$@"
